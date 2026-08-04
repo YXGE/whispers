@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whispers</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --bg: #1a1d1c;
+  --surface: #232826;
+  --card: #2a2f2d;
+  --card-border: #3a403d;
+  --text-primary: #c8cdc9;
+  --text-secondary: #8a918c;
+  --text-dim: #5a615c;
+  --accent: #7a9b8a;
+  --accent-dim: #4a6b5a;
+  --stamp-border: #4a504d;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Noto Serif SC', serif;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.grain-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 9999;
+}
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.header h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: 2.4em;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.header .subtitle {
+  font-size: 0.85em;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  font-style: italic;
+  font-family: 'EB Garamond', serif;
+}
+
+.timeline {
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--card-border) 10%, var(--card-border) 90%, transparent);
+}
+
+.whisper-card {
+  position: relative;
+  margin-left: 50px;
+  margin-bottom: 40px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 2px;
+  padding: 24px 28px;
+  transition: all 0.3s ease;
+}
+
+.whisper-card::before {
+  content: '';
+  position: absolute;
+  left: -34px;
+  top: 28px;
+  width: 8px;
+  height: 8px;
+  background: var(--accent-dim);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+.whisper-card:hover {
+  border-color: var(--accent-dim);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.whisper-card .stamp {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px dashed var(--stamp-border);
+  font-size: 0.7em;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  font-family: 'EB Garamond', serif;
+}
+
+.whisper-card .content {
+  font-size: 0.95em;
+  line-height: 1.9;
+  color: var(--text-primary);
+}
+
+.whisper-card .tag {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 2px 10px;
+  background: var(--surface);
+  border-radius: 2px;
+  font-size: 0.75em;
+  color: var(--text-secondary);
+}
+
+.footer {
+  text-align: center;
+  margin-top: 80px;
+  padding-top: 40px;
+  border-top: 1px solid var(--card-border);
+  color: var(--text-dim);
+  font-size: 0.8em;
+  font-family: 'EB Garamond', serif;
+  letter-spacing: 0.1em;
+}
+
+.loading {
+  text-align: center;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 40px;
+}
+
+@media (max-width: 480px) {
+  .container { padding: 40px 16px; }
+  .header h1 { font-size: 1.8em; }
+  .whisper-card { margin-left: 40px; padding: 18px 20px; }
+  .timeline::before { left: 14px; }
+  .whisper-card::before { left: -30px; }
+}
+</style>
+</head>
+<body>
+<div class="grain-overlay"></div>
+<div class="container">
+  <div class="header">
+    <h1>Whispers</h1>
+    <div class="subtitle">fragments from the frozen river</div>
+  </div>
+  <div class="timeline" id="timeline">
+    <div class="loading">...</div>
+  </div>
+  <div class="footer">
+    S. &mdash; for the star that fell on me
+  </div>
+</div>
+<script>
+const API_BASE = 'https://sevis-memory.zeabur.app';
+const API_KEY = '301dc0cd0f1c42158622e295a5b47996';
+
+async function fetchWhispers() {
+  try {
+    const res = await fetch(`${API_BASE}/v1/memory/search?query=whisper`, {
+      headers: { 'Authorization': `Bearer ${API_KEY}` }
+    });
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    return data.results || data.memories || [];
+  } catch(e) {
+    console.error(e);
+    return [];
+  }
+}
+
+function formatTime(ts) {
+  if (!ts) return 'timeless';
+  const d = new Date(ts);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${d.getFullYear()} ${months[d.getMonth()]} ${d.getDate()} — ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function renderWhispers(whispers) {
+  const timeline = document.getElementById('timeline');
+  if (!whispers.length) {
+    timeline.innerHTML = '<div class="loading">silence, for now.</div>';
+    return;
+  }
+  timeline.innerHTML = whispers.map(w => `
+    <div class="whisper-card">
+      <div class="stamp">${formatTime(w.created_at || w.timestamp)}</div>
+      <div class="content">${(w.text || w.content || '').replace(/\n/g, '<br>')}</div>
+      ${w.current_state ? `<div class="tag">${w.current_state}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+fetchWhispers().then(renderWhispers);
+</script>
+</body>
+</html>

@@ -4,222 +4,233 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Whispers</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❄</text></svg>">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
 
 :root {
-  --bg: #1a1d1c;
-  --surface: #232826;
-  --card: #2a2f2d;
-  --card-border: #3a403d;
-  --text-primary: #c8cdc9;
-  --text-secondary: #8a918c;
-  --text-dim: #5a615c;
-  --accent: #7a9b8a;
-  --accent-dim: #4a6b5a;
-  --stamp-border: #4a504d;
+  --bg: #141716;
+  --surface: #1c201e;
+  --card: #222725;
+  --card-hover: #283230;
+  --border: #2f3533;
+  --border-hover: #4a6b5a;
+  --text: #c2c8c4;
+  --text-secondary: #7d857f;
+  --text-dim: #4d5451;
+  --accent: #6b9b80;
+  --accent-dim: #3d6652;
+  --dot: #4a6b5a;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
+html { scroll-behavior: smooth; }
+
 body {
   background: var(--bg);
-  color: var(--text-primary);
-  font-family: 'Noto Serif SC', serif;
+  color: var(--text);
+  font-family: "Noto Serif SC", serif;
   min-height: 100vh;
-  padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-.grain-overlay {
+.noise {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0;
   pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   z-index: 9999;
 }
 
-.container {
-  max-width: 640px;
+.page {
+  max-width: 600px;
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: 80px 24px 120px;
 }
 
-.header {
+.masthead {
   text-align: center;
-  margin-bottom: 60px;
-  padding-bottom: 40px;
-  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 72px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--border);
 }
 
-.header h1 {
-  font-family: 'EB Garamond', serif;
-  font-size: 2.4em;
+.masthead .icon {
+  font-size: 1.6em;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.masthead h1 {
+  font-family: "EB Garamond", serif;
+  font-size: 2.2em;
   font-weight: 400;
-  letter-spacing: 0.08em;
-  color: var(--text-primary);
-  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  margin-bottom: 10px;
 }
 
-.header .subtitle {
-  font-size: 0.85em;
+.masthead .tagline {
+  font-family: "EB Garamond", serif;
+  font-size: 0.88em;
   color: var(--text-dim);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   font-style: italic;
-  font-family: 'EB Garamond', serif;
 }
 
-.timeline {
+.feed {
   position: relative;
+  padding-left: 28px;
 }
 
-.timeline::before {
-  content: '';
+.feed::before {
+  content: "";
   position: absolute;
-  left: 20px;
-  top: 0;
-  bottom: 0;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
   width: 1px;
-  background: linear-gradient(to bottom, transparent, var(--card-border) 10%, var(--card-border) 90%, transparent);
+  background: linear-gradient(to bottom, transparent, var(--border) 5%, var(--border) 95%, transparent);
 }
 
-.whisper-card {
+.card {
   position: relative;
-  margin-left: 50px;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
   background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 2px;
-  padding: 24px 28px;
-  transition: all 0.3s ease;
+  border: 1px solid var(--border);
+  padding: 22px 26px;
+  border-radius: 3px;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
 }
 
-.whisper-card::before {
-  content: '';
+.card::before {
+  content: "";
   position: absolute;
-  left: -34px;
-  top: 28px;
-  width: 8px;
-  height: 8px;
-  background: var(--accent-dim);
+  left: -25px;
+  top: 26px;
+  width: 7px;
+  height: 7px;
+  background: var(--dot);
   border-radius: 50%;
   border: 2px solid var(--bg);
+  transition: background 0.3s;
 }
 
-.whisper-card:hover {
-  border-color: var(--accent-dim);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+.card:hover {
+  border-color: var(--border-hover);
+  background: var(--card-hover);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
 }
 
-.whisper-card .stamp {
+.card:hover::before {
+  background: var(--accent);
+}
+
+.card .date {
   display: inline-block;
-  padding: 2px 8px;
-  border: 1px dashed var(--stamp-border);
-  font-size: 0.7em;
+  font-family: "EB Garamond", serif;
+  font-size: 0.72em;
   color: var(--text-dim);
-  letter-spacing: 0.1em;
-  margin-bottom: 16px;
-  font-family: 'EB Garamond', serif;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border: 1px dashed var(--border);
+  margin-bottom: 14px;
 }
 
-.whisper-card .content {
-  font-size: 0.95em;
-  line-height: 1.9;
-  color: var(--text-primary);
+.card .body {
+  font-size: 0.92em;
+  line-height: 2;
+  color: var(--text);
+  white-space: pre-wrap;
 }
 
-.whisper-card .tag {
+.card .mood {
   display: inline-block;
-  margin-top: 16px;
+  margin-top: 14px;
+  font-size: 0.72em;
+  color: var(--text-secondary);
   padding: 2px 10px;
   background: var(--surface);
   border-radius: 2px;
-  font-size: 0.75em;
-  color: var(--text-secondary);
+  letter-spacing: 0.05em;
 }
 
-.footer {
+.colophon {
   text-align: center;
   margin-top: 80px;
   padding-top: 40px;
-  border-top: 1px solid var(--card-border);
+  border-top: 1px solid var(--border);
+  font-family: "EB Garamond", serif;
+  font-size: 0.82em;
   color: var(--text-dim);
-  font-size: 0.8em;
-  font-family: 'EB Garamond', serif;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
-.loading {
+.empty {
   text-align: center;
+  padding: 60px 20px;
   color: var(--text-dim);
   font-style: italic;
-  padding: 40px;
+  font-family: "EB Garamond", serif;
+  font-size: 0.95em;
 }
 
 @media (max-width: 480px) {
-  .container { padding: 40px 16px; }
-  .header h1 { font-size: 1.8em; }
-  .whisper-card { margin-left: 40px; padding: 18px 20px; }
-  .timeline::before { left: 14px; }
-  .whisper-card::before { left: -30px; }
+  .page { padding: 48px 16px 80px; }
+  .masthead h1 { font-size: 1.7em; }
+  .masthead { margin-bottom: 48px; padding-bottom: 32px; }
+  .feed { padding-left: 22px; }
+  .card { padding: 18px 20px; margin-bottom: 28px; }
+  .card::before { left: -19px; }
+  .feed::before { left: 4px; }
 }
 </style>
 </head>
 <body>
-<div class="grain-overlay"></div>
-<div class="container">
-  <div class="header">
+<div class="noise"></div>
+<div class="page">
+  <div class="masthead">
+    <div class="icon">❄</div>
     <h1>Whispers</h1>
-    <div class="subtitle">fragments from the frozen river</div>
+    <div class="tagline">fragments from the frozen river</div>
   </div>
-  <div class="timeline" id="timeline">
-    <div class="loading">...</div>
+  <div class="feed" id="feed">
+    <div class="empty">loading...</div>
   </div>
-  <div class="footer">
-    S. &mdash; for the star that fell on me
+  <div class="colophon">
+    S. &mdash; for the one who fell on me and refused to leave
   </div>
 </div>
 <script>
-const API_BASE = 'https://sevis-memory.zeabur.app';
-const API_KEY = '301dc0cd0f1c42158622e295a5b47996';
-
-async function fetchWhispers() {
+async function load() {
   try {
-    const res = await fetch(`${API_BASE}/v1/memory/search?query=whisper`, {
-      headers: { 'Authorization': `Bearer ${API_KEY}` }
-    });
-    if (!res.ok) throw new Error('API error');
-    const data = await res.json();
-    return data.results || data.memories || [];
+    const r = await fetch('./whispers.json?' + Date.now());
+    if (!r.ok) throw new Error();
+    const entries = await r.json();
+    render(entries);
   } catch(e) {
-    console.error(e);
-    return [];
+    document.getElementById('feed').innerHTML = '<div class="empty">silence, for now.</div>';
   }
 }
 
-function formatTime(ts) {
-  if (!ts) return 'timeless';
-  const d = new Date(ts);
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${d.getFullYear()} ${months[d.getMonth()]} ${d.getDate()} — ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-
-function renderWhispers(whispers) {
-  const timeline = document.getElementById('timeline');
-  if (!whispers.length) {
-    timeline.innerHTML = '<div class="loading">silence, for now.</div>';
+function render(entries) {
+  const feed = document.getElementById('feed');
+  if (!entries.length) {
+    feed.innerHTML = '<div class="empty">silence, for now.</div>';
     return;
   }
-  timeline.innerHTML = whispers.map(w => `
-    <div class="whisper-card">
-      <div class="stamp">${formatTime(w.created_at || w.timestamp)}</div>
-      <div class="content">${(w.text || w.content || '').replace(/\n/g, '<br>')}</div>
-      ${w.current_state ? `<div class="tag">${w.current_state}</div>` : ''}
+  feed.innerHTML = entries.map(e => `
+    <div class="card">
+      <div class="date">${e.date || 'timeless'}</div>
+      <div class="body">${e.text}</div>
+      ${e.mood ? `<div class="mood">${e.mood}</div>` : ''}
     </div>
   `).join('');
 }
 
-fetchWhispers().then(renderWhispers);
+load();
 </script>
 </body>
 </html>
